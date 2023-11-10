@@ -128,11 +128,9 @@ def execute_option(choice):
         your_id = read_id()
         if your_id != 0:
             print("\nFrom", name_by_id(your_id), "there are direct tracks (not necessarily trains) to:\n") 
-            #adj_list = network.list_adjacent_stations(your_id)
             answer_list = network.list_adjacent_stations(your_id)
             for ans in answer_list:
-                answer = name_by_id(ans) + " (" + str(ans) + ") "
-                #answer = name_by_id(ans)
+                answer = name_by_id(ans) + " (" + str(ans) + ") - " + str(round(network.stations[your_id][ans], 2)) + " km"
                 print(answer)
  
     elif choice == '3':
@@ -141,7 +139,13 @@ def execute_option(choice):
         your_id2 = read_id()
         name2 = name_by_id(your_id2)
         if network.isadjacent(your_id1, your_id2):
-            print("\n{} ({}) and {} ({}) are adjacent stations".format(name1, your_id1, name2, your_id2))
+            dist1 = network.stations[your_id1][your_id2]
+            dist2 = network.stations[your_id2][your_id1]
+            dist1_round = round(network.stations[your_id1][your_id2], 2)
+            dist2_round = round(network.stations[your_id2][your_id1], 2)
+            print("\n{} ({}) and {} ({}) are adjacent stations ({} km)".format(name1, your_id1, name2, your_id2, dist1_round))
+            if dist1 != dist2:
+                print("hm, the distance is slightly different in the other direction:", dist2_round)
             print("(mind you, there is not necessarily a direct train between them)")
         else:
             print("{} ({}) and {} ({}) are not adjacent stations.".format(name1, your_id1, name2, your_id2))
