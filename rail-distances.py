@@ -96,13 +96,50 @@ def read_id():
         return 0
 
 
-def show_menu():
+def run_identify_by_id():
+    """
+    Read in an ID input by user, and look up the name.
+    """
+    your_id = read_id()
+    if your_id != 0:
+        name = name_by_id(your_id)
+        print(name)
+
+
+def run_list_adj_stations():
+    """
+    Read in an ID input by user, look up the name and direct routes from there.
+    """
+    your_id = read_id()
+    if your_id != 0:
+        print("\nFrom", name_by_id(your_id), "there are direct tracks (not necessarily trains) to:\n") 
+        answer_list = network.list_adjacent_stations(your_id)
+        for ans in answer_list:
+            answer = name_by_id(ans) + " (" + str(ans) + ") - " + str(round(network.stations[your_id][ans], 2)) + " km"
+            print(answer)
+
+def run_isadjacent():
+    your_id1 = read_id()
+    name1 = name_by_id(your_id1)
+    your_id2 = read_id()
+    name2 = name_by_id(your_id2)
+    if network.isadjacent(your_id1, your_id2):
+        dist1 = network.stations[your_id1][your_id2]
+        dist2 = network.stations[your_id2][your_id1]
+        dist1_round = round(network.stations[your_id1][your_id2], 2)
+        dist2_round = round(network.stations[your_id2][your_id1], 2)
+        print("\n{} ({}) and {} ({}) are adjacent stations ({} km)".format(name1, your_id1, name2, your_id2, dist1_round))
+        if dist1 != dist2:
+            print("hm, the distance is slightly different in the other direction:", dist2_round)
+        print("(mind you, there is not necessarily a direct train between them)")
+    else:
+        print("{} ({}) and {} ({}) are not adjacent stations.".format(name1, your_id1, name2, your_id2))
+
+
+def show_menu(options):
     print("What you can ask for:\n")
-    print("1 : identify a station by its ID number - between", smallest_id, "and", largest_id)
-    print("2 : identify a station, and list where to go from there")
-    print("3 : are two stations adjacent in the rail network?")
-#TODO    print("4 : what's the distance between two stations?")
-    print("4 : quit")
+    for i in range(0, len(options), 2):
+        print("{} : {}".format(i//2+1, options[i]))
 
 
 # Note: Python 3.10 introduced "switch"
@@ -115,40 +152,19 @@ def show_menu():
 # This works without the match-case switch
 # (tried in python 3.8) 
 # return value True / False is about "wanna_quit"
+# currently 3 tasks implemented, TODO variable tasks number, depending on size of options
 def execute_option(choice):
     global network
+    global options
     
     if choice == '1':
-        your_id = read_id()
-        if your_id != 0:
-            name = name_by_id(your_id)
-            print(name)
+        options[1]()
 
     elif choice == '2':
-        your_id = read_id()
-        if your_id != 0:
-            print("\nFrom", name_by_id(your_id), "there are direct tracks (not necessarily trains) to:\n") 
-            answer_list = network.list_adjacent_stations(your_id)
-            for ans in answer_list:
-                answer = name_by_id(ans) + " (" + str(ans) + ") - " + str(round(network.stations[your_id][ans], 2)) + " km"
-                print(answer)
+        options[3]()
  
     elif choice == '3':
-        your_id1 = read_id()
-        name1 = name_by_id(your_id1)
-        your_id2 = read_id()
-        name2 = name_by_id(your_id2)
-        if network.isadjacent(your_id1, your_id2):
-            dist1 = network.stations[your_id1][your_id2]
-            dist2 = network.stations[your_id2][your_id1]
-            dist1_round = round(network.stations[your_id1][your_id2], 2)
-            dist2_round = round(network.stations[your_id2][your_id1], 2)
-            print("\n{} ({}) and {} ({}) are adjacent stations ({} km)".format(name1, your_id1, name2, your_id2, dist1_round))
-            if dist1 != dist2:
-                print("hm, the distance is slightly different in the other direction:", dist2_round)
-            print("(mind you, there is not necessarily a direct train between them)")
-        else:
-            print("{} ({}) and {} ({}) are not adjacent stations.".format(name1, your_id1, name2, your_id2))
+        options[5]()
 
     else:
         print("Thanks. Happy travels.")
@@ -157,7 +173,7 @@ def execute_option(choice):
 
 
 def run_menu():
-    show_menu()
+    show_menu(options)
     try:
         your_choice = input()
         print("You've selected:", your_choice, "\n")
@@ -190,6 +206,17 @@ del tracks
 del tracks_col12
 del tracks_stations
 
+# Building the menu options:
+
+options = ( "identify a station by its ID number - between {} and {}".format(smallest_id, largest_id),
+            run_identify_by_id, 
+            "identify a station, and list where to go from there",
+            run_list_adj_stations,
+            "are two stations adjacent in the rail network?",
+            run_isadjacent,
+#TODO            "what's the distance between two stations?",
+            "quit"
+)
 
 run_menu()
 
